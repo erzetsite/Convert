@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Cloudflare Worker for file conversions",
   "main": "src/index.js",
+  "type": "module",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
@@ -11,7 +12,8 @@
     "docx": "^8.5.0",
     "exceljs": "^4.4.0",
     "hono": "^4.4.6",
-    "pdf-lib": "^1.17.1"
+    "pdf-lib": "^1.17.1",
+    "markdown-it": "^13.0.2"
   },
   "devDependencies": {
     "wrangler": "^3.57.2"
