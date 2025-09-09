@@ -1,4 +1,3 @@
-// index.js
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
@@ -7,7 +6,6 @@ import { PDFDocument, rgb } from 'pdf-lib';
 import MarkdownIt from 'markdown-it';
 
 const app = new Hono();
-
 app.use('/convert', cors({ origin: '*', allowMethods: ['POST'] }));
 
 app.post('/convert', async c => {
@@ -31,7 +29,8 @@ app.post('/convert', async c => {
       case 'xlsx': {
         const wb = new ExcelJS.Workbook();
         const ws = wb.addWorksheet('Sheet1');
-        ws.addRows(Array.isArray(content) ? content : [content]);
+        const data = typeof content === 'string' ? JSON.parse(content) : content;
+        ws.addRows(Array.isArray(data) ? data : [data]);
         buffer = Buffer.from(await wb.xlsx.writeBuffer());
         mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
         filename = `result-${ts}.xlsx`;
@@ -72,5 +71,5 @@ app.post('/convert', async c => {
   }
 });
 
-app.all('*', c => c.text('Not Found', 404));
+app.all('*', () => new Response('Not Found', { status: 404 }));
 export default app;
