@@ -1,103 +1,76 @@
+// index.js
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { Packer } from 'docx';
-import { Document, Paragraph, TextRun } from 'docx';
+import { Document, Packer, Paragraph, TextRun } from 'docx';
 import ExcelJS from 'exceljs';
 import { PDFDocument, rgb } from 'pdf-lib';
+import MarkdownIt from 'markdown-it';
 
 const app = new Hono();
 
-// Add CORS middleware to allow requests from the frontend domain
-app.use('/convert', cors({
-  origin: 'https://convert.rzsite.my.id',
-  allowMethods: ['POST', 'OPTIONS'],
-  allowHeaders: ['Content-Type'],
-}));
+app.use('/convert', cors({ origin: '*', allowMethods: ['POST'] }));
 
-app.post('/convert', async (c) => {
+app.post('/convert', async c => {
   try {
     const { format, content } = await c.req.json();
+    if (!format || !content) return c.json({ error: 'format & content required' }, 400);
 
-    if (!format || !content) {
-      return c.json({ error: 'Missing format or content' }, 400);
-    }
-
-    let buffer, contentType, fileName;
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const ts = new Date().toISOString().replace(/[:.]/g, '-');
+    let buffer, mime, filename;
 
     switch (format) {
-      case 'docx':
+      case 'docx': {
         const doc = new Document({
-          sections: [
-            {
-              properties: {},
-              children: [
-                new Paragraph({
-                  children: [new TextRun(content)],
-                }),
-              ],
-            },
-          ],
+          sections: [{ children: [new Paragraph({ children: [new TextRun(content)] })] }]
         });
         buffer = await Packer.toBuffer(doc);
-        contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-        fileName = `converted-${timestamp}.docx`;
+        mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        filename = `result-${ts}.docx`;
         break;
-
-      case 'xlsx':
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet('Sheet 1');
-        worksheet.getCell('A1').value = content;
-        buffer = await workbook.xlsx.writeBuffer();
-        contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-        fileName = `converted-${timestamp}.xlsx`;
+      }
+      case 'xlsx': {
+        const wb = new ExcelJS.Workbook();
+        const ws = wb.addWorksheet('Sheet1');
+        ws.addRows(Array.isArray(content) ? content : [content]);
+        buffer = Buffer.from(await wb.xlsx.writeBuffer());
+        mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        filename = `result-${ts}.xlsx`;
         break;
-
-      case 'pdf':
-        const pdfDoc = await PDFDocument.create();
-        const page = pdfDoc.addPage();
-        const { width, height } = page.getSize();
-        page.drawText(content, {
-          x: 50,
-          y: height - 50,
-          size: 12,
-          color: rgb(0, 0, 0),
-        });
-        const pdfBytes = await pdfDoc.save();
-        buffer = pdfBytes.buffer;
-        contentType = 'application/pdf';
-        fileName = `converted-${timestamp}.pdf`;
+      }
+      case 'pdf': {
+        const pdf = await PDFDocument.create();
+        const page = pdf.addPage();
+        page.drawText(content, { x: 50, y: page.getHeight() - 50, size: 12, color: rgb(0, 0, 0) });
+        buffer = (await pdf.save()).buffer;
+        mime = 'application/pdf';
+        filename = `result-${ts}.pdf`;
         break;
-
-      case 'md':
-        buffer = new TextEncoder().encode(content);
-        contentType = 'text/markdown; charset=utf-8';
-        fileName = `converted-${timestamp}.md`;
+      }
+      case 'md': {
+        buffer = Buffer.from(new MarkdownIt().render(content));
+        mime = 'text/markdown; charset=utf-8';
+        filename = `result-${ts}.md`;
         break;
-
-      case 'txt':
-        buffer = new TextEncoder().encode(content);
-        contentType = 'text/plain; charset=utf-8';
-        fileName = `converted-${timestamp}.txt`;
+      }
+      case 'txt': {
+        buffer = Buffer.from(content, 'utf8');
+        mime = 'text/plain; charset=utf-8';
+        filename = `result-${ts}.txt`;
         break;
-
-      default:
-        return c.json({ error: 'Unsupported format' }, 400);
+      }
+      default: return c.json({ error: 'Unsupported format' }, 400);
     }
 
     return new Response(buffer, {
       headers: {
-        'Content-Type': contentType,
-        'Content-Disposition': `attachment; filename="${fileName}"`,
-      },
+        'Content-Type': mime,
+        'Content-Disposition': `attachment; filename="${filename}"`
+      }
     });
-
-  } catch (error) {
-    console.error('Conversion Error:', error);
-    return c.json({ error: 'An internal error occurred during conversion.' }, 500);
+  } catch (err) {
+    return c.json({ error: err.message }, 500);
   }
 });
 
-app.all('*', () => new Response('Not Found', { status: 404 }));
-
+app.all('*', c => c.text('Not Found', 404));
 export default app;
