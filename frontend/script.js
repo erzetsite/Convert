@@ -3,7 +3,6 @@ const API_URL = 'https://api.convert.rzsite.my.id/convert';
 /* ---------- theme ---------- */
 const html = document.documentElement;
 const toggle = document.getElementById('theme-toggle');
-
 function applyTheme(){
   const dark = localStorage.theme === 'dark' || (!('theme' in localStorage) && matchMedia('(prefers-color-scheme: dark)').matches);
   html.className = dark ? 'rp-dark' : 'rp-light';
@@ -14,7 +13,7 @@ toggle.addEventListener('click', () => {
 });
 applyTheme();
 
-/* ---------- ui helpers ---------- */
+/* ---------- ui ---------- */
 const $ = id => document.getElementById(id);
 const contentInput = $('content-input');
 const fileUpload   = $('file-upload');
@@ -23,13 +22,12 @@ const submitBtn    = $('submit-btn');
 const btnText      = $('btn-text');
 const spinner      = $('spinner');
 const status       = $('status');
-const helpBox      = $('help-box');
 
-/* show/hide help per format */
+/* show/hide format examples */
 formatSelect.addEventListener('change', () => {
-  helpBox.querySelectorAll('[data-for]').forEach(el => el.style.display = el.dataset.for === formatSelect.value ? 'block' : 'none');
+  document.querySelectorAll('[data-fmt]').forEach(el => el.style.display = el.dataset.fmt === formatSelect.value ? 'block' : 'none');
 });
-helpBox.querySelectorAll('[data-for]').forEach(el => el.style.display = el.dataset.for === formatSelect.value ? 'block' : 'none');
+document.querySelectorAll('[data-fmt]').forEach(el => el.style.display = el.dataset.fmt === formatSelect.value ? 'block' : 'none');
 
 /* file upload */
 fileUpload.addEventListener('change', e => {
@@ -45,7 +43,7 @@ fileUpload.addEventListener('change', e => {
 $('converter-form').addEventListener('submit', async ev => {
   ev.preventDefault();
   const content = contentInput.value.trim();
-  if (!content) { status.textContent = 'Content required'; return; }
+  if (!content){ status.textContent = 'Content required'; return; }
 
   submitBtn.disabled = true;
   btnText.textContent = 'Converting…';
@@ -58,7 +56,7 @@ $('converter-form').addEventListener('submit', async ev => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ format: formatSelect.value, content })
     });
-    if (!res.ok) {
+    if (!res.ok){
       const err = await res.json().catch(() => ({ error: 'Unknown error' }));
       throw new Error(err.error || res.statusText);
     }

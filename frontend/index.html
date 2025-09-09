@@ -4,27 +4,70 @@
   <meta charset="UTF-8">
   <title>Universal Converter – Rosé Pine</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://raw.githubusercontent.com/erzetsite/Convert/main/frontend/styles.css">
+  <style>
+    /* ---------- Rosé Pine Palette ---------- */
+    :root{
+      --base:#191724; --surface:#1f1d2e; --overlay:#26233a;
+      --muted:#6e6a86; --subtle:#908caa; --text:#e0def4;
+      --love:#eb6f92; --gold:#f6c177; --rose:#ebbcba;
+      --pine:#31748f; --foam:#9ccfd8; --iris:#c4a7e7;
+    }
+    .rp-light{
+      --base:#faf4ed; --surface:#fffaf3; --overlay:#f2e9e1;
+      --muted:#9893a5; --subtle:#797593; --text:#575279;
+      --love:#b4637a; --gold:#ea9d34; --rose:#d7827e;
+      --pine:#286983; --foam:#56949f; --iris:#907aa9;
+    }
+    /* ---------- Utility ---------- */
+    .bg-base{background:var(--base);}
+    .bg-surface{background:var(--surface);}
+    .bg-overlay{background:var(--overlay);}
+    .bg-love{background:var(--love);}
+    .text-text{color:var(--text);}
+    .text-subtle{color:var(--subtle);}
+    .text-love{color:var(--love);}
+    .text-foam{color:var(--foam);}
+    .border-overlay{border-color:var(--overlay);}
+    /* ---------- Base ---------- */
+    html{scroll-behavior:smooth;}
+    body{font-family:system-ui, sans-serif; margin:0;}
+    /* ---------- Spinner ---------- */
+    .spinner{
+      width:1.25rem; height:1.25rem;
+      border:2px solid var(--base);
+      border-top-color:transparent;
+      border-radius:9999px;
+      animation:spin 1s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg);}}
+    /* ---------- Layout ---------- */
+    main{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1.5rem;}
+    .card{width:100%; max-width:42rem; background:var(--surface); border-radius:1rem; box-shadow:0 10px 30px rgba(0,0,0,.25);}
+    @media (min-width:640px){.card{padding:2rem;}}
+    /* ---------- Responsive Type ---------- */
+    h1{font-size:1.5rem; line-height:2rem;}
+    @media (min-width:640px){h1{font-size:1.875rem; line-height:2.25rem;}}
+    /* ---------- Theme Toggle Icon ---------- */
+    .rp-dark #icon-dark,
+    .rp-light #icon-light{display:inline-block;}
+  </style>
 </head>
-<body class="bg-base text-text font-sans">
+<body class="bg-base text-text">
 
   <header class="absolute top-0 right-0 p-4">
-    <button id="theme-toggle" class="rounded-full p-2 bg-surface hover:bg-overlay">
-      <span id="icon-light" class="hidden">🌙</span>
-      <span id="icon-dark" class="hidden">☀️</span>
+    <button id="theme-toggle" class="rounded-full p-2 bg-surface hover:bg-overlay transition">
+      <span id="icon-light" class="hidden">☀️</span>
+      <span id="icon-dark" class="hidden">🌙</span>
     </button>
   </header>
 
-  <main class="min-h-screen flex items-center justify-center p-6">
-    <section class="w-full max-w-3xl bg-surface rounded-2xl shadow-lg p-6 sm:p-8 space-y-6">
-
-      <h1 class="text-2xl sm:text-3xl font-bold text-love text-center">Universal Text Converter</h1>
+  <main>
+    <section class="card p-6 space-y-6">
+      <h1 class="font-bold text-love text-center">Universal Text Converter</h1>
 
       <form id="converter-form" class="space-y-4">
-        <label for="content-input" class="sr-only">Content</label>
         <textarea id="content-input" rows="10" placeholder="Paste / type your content here…"
-                  class="w-full p-3 rounded-lg bg-base border border-overlay focus:border-love focus:ring-0 outline-none resize-y"></textarea>
+                  class="w-full p-3 rounded-lg bg-base border border-overlay focus:border-love outline-none resize-y"></textarea>
 
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
           <label for="file-upload" class="cursor-pointer px-4 py-2 bg-overlay rounded-md hover:bg-highlight transition">
@@ -44,21 +87,41 @@
           </div>
         </div>
 
-        <details id="help-box" class="text-sm bg-overlay rounded-lg p-3">
+        <!-- Format Examples (collapsible) -->
+        <details class="text-sm bg-overlay rounded-lg p-3">
           <summary class="cursor-pointer text-foam">Show format examples</summary>
-          <div class="mt-3 space-y-3 text-subtle">
-            <div data-for="docx"><b>Word:</b> plain text only.</div>
-            <div data-for="xlsx"><b>Excel:</b> JSON array of objects.</div>
-            <div data-for="pdf"><b>PDF:</b> plain text page.</div>
-            <div data-for="md"><b>Markdown:</b> any GitHub-flavoured MD.</div>
-            <div data-for="txt"><b>Text:</b> raw text.</div>
+          <div class="mt-3 space-y-2 text-subtle">
+            <div data-fmt="docx">
+              <b>Word (.docx):</b>
+              <pre class="text-xs bg-base p-2 rounded mt-1 overflow-auto">\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\title{Sample}
+\begin{document}
+\maketitle
+Plain text here.
+\end{document}</pre>
+            </div>
+            <div data-fmt="xlsx" class="hidden">
+              <b>Excel (.xlsx):</b> JSON array of objects / arrays.
+              <pre class="text-xs bg-base p-2 rounded mt-1 overflow-auto">[{"Nama":"Faza","Nilai":90},{"Nama":"Akhyar","Nilai":85}]</pre>
+            </div>
+            <div data-fmt="pdf" class="hidden">
+              <b>PDF (.pdf):</b> plain text page.
+            </div>
+            <div data-fmt="md" class="hidden">
+              <b>Markdown (.md):</b> any GitHub-flavoured Markdown.
+            </div>
+            <div data-fmt="txt" class="hidden">
+              <b>Text (.txt):</b> raw text.
+            </div>
           </div>
         </details>
 
         <button id="submit-btn" type="submit"
-                class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-love text-base font-bold rounded-lg hover:bg-highlight transition disabled:opacity-50">
+                class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-love text-base font-bold rounded-lg hover:opacity-90 transition disabled:opacity-50">
           <span id="btn-text">Convert & Download</span>
-          <span id="spinner" class="hidden w-5 h-5 rounded-full border-2 border-base border-t-transparent animate-spin"></span>
+          <span id="spinner" class="spinner hidden"></span>
         </button>
       </form>
 
