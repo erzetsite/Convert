@@ -1,0 +1,10 @@
+# Node
+node_modules
+
+# Wrangler
+.wrangler
+wrangler.toml.local
+
+# IDE
+.idea
+.vscode

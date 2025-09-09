@@ -1,0 +1,14 @@
+{
+  "name": "cloudflare-converter-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Root for the full-stack converter app",
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "deploy:backend": "cd backend && npm run deploy",
+    "dev": "echo 'Run `dev:backend` for the worker and open frontend/index.html in a browser.'"
+  },
+  "author": "AI Engineer",
+  "license": "MIT"
+}
