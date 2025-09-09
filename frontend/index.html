@@ -1,84 +1,71 @@
-<!DOCTYPE html>
-<html lang="en" class="">
+<!doctype html>
+<html lang="en" class="rp-dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Converter</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-      }
-    </script>
-    <style>
-        .spinner {
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Universal Converter – Rosé Pine</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://raw.githubusercontent.com/erzetsite/Convert/main/frontend/styles.css">">
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
+<body class="bg-base text-text font-sans">
 
-    <div class="min-h-screen flex flex-col items-center justify-center p-4">
-        <header class="absolute top-0 right-0 p-4">
-            <button id="theme-toggle" class="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900">
-                <svg id="theme-icon-light" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                <svg id="theme-icon-dark" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
-            </button>
-        </header>
+  <header class="absolute top-0 right-0 p-4">
+    <button id="theme-toggle" class="rounded-full p-2 bg-surface hover:bg-overlay">
+      <span id="icon-light" class="hidden">🌙</span>
+      <span id="icon-dark" class="hidden">☀️</span>
+    </button>
+  </header>
 
-        <main class="w-full max-w-2xl bg-white dark:bg-gray-800 shadow-lg rounded-xl p-6 sm:p-8 space-y-6">
-            <div class="text-center">
-                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Universal Text Converter</h1>
-                <p class="text-gray-500 dark:text-gray-400 mt-1">Paste text or upload a file to convert.</p>
-            </div>
+  <main class="min-h-screen flex items-center justify-center p-6">
+    <section class="w-full max-w-3xl bg-surface rounded-2xl shadow-lg p-6 sm:p-8 space-y-6">
 
-            <form id="converter-form" class="space-y-4">
-                <div>
-                    <label for="content-input" class="sr-only">Content</label>
-                    <textarea 
-                        id="content-input" 
-                        rows="10" 
-                        placeholder="Type or paste your content here..." 
-                        class="w-full p-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"></textarea>
-                </div>
+      <h1 class="text-2xl sm:text-3xl font-bold text-love text-center">Universal Text Converter</h1>
 
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <label for="file-upload" class="w-full sm:w-auto cursor-pointer px-4 py-2 text-center bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-sm font-medium rounded-md transition">
-                        Upload File
-                        <input id="file-upload" type="file" class="hidden">
-                    </label>
+      <form id="converter-form" class="space-y-4">
+        <label for="content-input" class="sr-only">Content</label>
+        <textarea id="content-input" rows="10" placeholder="Paste / type your content here…"
+                  class="w-full p-3 rounded-lg bg-base border border-overlay focus:border-love focus:ring-0 outline-none resize-y"></textarea>
 
-                    <div class="flex items-center gap-2">
-                        <label for="format-select" class="text-sm font-medium">Convert to:</label>
-                        <select id="format-select" class="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
-                            <option value="docx">Word (.docx)</option>
-                            <option value="xlsx">Excel (.xlsx)</option>
-                            <option value="pdf">PDF (.pdf)</option>
-                            <option value="md">Markdown (.md)</option>
-                            <option value="txt">Text (.txt)</option>
-                        </select>
-                    </div>
-                </div>
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <label for="file-upload" class="cursor-pointer px-4 py-2 bg-overlay rounded-md hover:bg-highlight transition">
+            Upload File
+            <input id="file-upload" type="file" class="hidden">
+          </label>
 
-                <div>
-                    <button type="submit" id="submit-btn" class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition">
-                        <span id="btn-text">Convert & Download</span>
-                        <div id="spinner" class="spinner w-5 h-5 rounded-full border-2 border-white hidden"></div>
-                    </button>
-                </div>
-            </form>
-            <div id="status-message" class="text-center text-sm text-red-500 min-h-[1.25rem]"></div>
-        </main>
+          <div class="flex items-center gap-2">
+            <label for="format-select" class="text-sm">Convert to:</label>
+            <select id="format-select" class="bg-overlay border border-highlight rounded-md py-2 px-3 focus:border-love outline-none">
+              <option value="docx">Word (.docx)</option>
+              <option value="xlsx">Excel (.xlsx)</option>
+              <option value="pdf">PDF (.pdf)</option>
+              <option value="md">Markdown (.md)</option>
+              <option value="txt">Text (.txt)</option>
+            </select>
+          </div>
+        </div>
 
-        <footer class="text-center text-gray-500 dark:text-gray-400 mt-8 text-sm">
-            <p>Powered by Cloudflare Pages & Workers.</p>
-        </footer>
-    </div>
+        <details id="help-box" class="text-sm bg-overlay rounded-lg p-3">
+          <summary class="cursor-pointer text-foam">Show format examples</summary>
+          <div class="mt-3 space-y-3 text-subtle">
+            <div data-for="docx"><b>Word:</b> plain text only.</div>
+            <div data-for="xlsx"><b>Excel:</b> JSON array of objects.</div>
+            <div data-for="pdf"><b>PDF:</b> plain text page.</div>
+            <div data-for="md"><b>Markdown:</b> any GitHub-flavoured MD.</div>
+            <div data-for="txt"><b>Text:</b> raw text.</div>
+          </div>
+        </details>
 
-    <script src="script.js"></script>
+        <button id="submit-btn" type="submit"
+                class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-love text-base font-bold rounded-lg hover:bg-highlight transition disabled:opacity-50">
+          <span id="btn-text">Convert & Download</span>
+          <span id="spinner" class="hidden w-5 h-5 rounded-full border-2 border-base border-t-transparent animate-spin"></span>
+        </button>
+      </form>
+
+      <p id="status" class="text-center text-sm text-subtle min-h-[1.25rem]"></p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
 </body>
 </html>
