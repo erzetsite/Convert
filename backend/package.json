@@ -1,21 +1,59 @@
 {
-  "name": "converter-api-worker",
-  "version": "1.0.0",
-  "description": "Cloudflare Worker for file conversions",
+  "name": "rose-pine-converter-api",
+  "version": "2.0.0",
+  "description": "🌸 Beautiful file converter API with Rosé Pine theme - Powered by Cloudflare Workers",
   "main": "src/index.js",
-  "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "dev": "wrangler dev --port 8787",
+    "deploy": "wrangler deploy",
+    "test": "node test/test.js",
+    "format": "prettier --write src/**/*.js",
+    "lint": "eslint src/**/*.js"
   },
+  "keywords": [
+    "file-converter",
+    "rose-pine",
+    "cloudflare-workers",
+    "pdf",
+    "docx",
+    "excel",
+    "markdown",
+    "latex",
+    "beautiful-ui"
+  ],
+  "author": "Your Name <your.email@domain.com>",
+  "license": "MIT",
   "dependencies": {
     "docx": "^8.5.0",
     "exceljs": "^4.4.0",
     "hono": "^4.4.6",
     "pdf-lib": "^1.17.1",
-    "markdown-it": "^13.0.2"
+    "@rose-pine/palette": "^4.0.1"
   },
   "devDependencies": {
-    "wrangler": "^3.57.2"
+    "wrangler": "^3.57.2",
+    "prettier": "^3.0.0",
+    "eslint": "^8.45.0",
+    "@cloudflare/workers-types": "^4.20240529.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/rose-pine-converter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/rose-pine-converter/issues"
+  },
+  "homepage": "https://converter.rzsite.my.id",
+  "wrangler": {
+    "name": "rose-pine-converter",
+    "main": "src/index.js",
+    "compatibility_date": "2024-01-01",
+    "compatibility_flags": ["nodejs_compat"],
+    "vars": {
+      "ENVIRONMENT": "production"
+    }
   }
 }
