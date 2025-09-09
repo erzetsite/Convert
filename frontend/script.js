@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
         html.setAttribute('data-theme', theme);
         localStorage.setItem('rp-theme', theme);
         
-        // Update theme icon
         const icons = {
             main: '🌸',
             moon: '🌙', 
@@ -26,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
         applyTheme(themes[currentThemeIndex]);
     }
     
-    // Initialize theme
     const savedTheme = localStorage.getItem('rp-theme') || 'main';
     currentThemeIndex = themes.indexOf(savedTheme);
     if (currentThemeIndex === -1) currentThemeIndex = 0;
@@ -44,18 +42,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const spinner = document.getElementById('spinner');
     const statusMessage = document.getElementById('status-message');
 
-    // File Upload Handler with drag and drop
+    // 🔥 FIXED: Enhanced file upload with better validation
     const fileUploadLabel = document.querySelector('.file-upload-label');
     
     function handleFileUpload(file) {
         if (!file) return;
         
-        const validTypes = ['text/plain', 'text/markdown', 'application/json', 'text/x-tex'];
-        const validExtensions = ['.txt', '.md', '.json', '.tex'];
+        const validExtensions = ['.txt', '.md', '.json', '.tex', '.docx', '.pdf'];
         const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
         
-        if (!validTypes.includes(file.type) && !validExtensions.includes(fileExtension)) {
-            showStatus('Please upload a valid file (.txt, .md, .json, .tex)', 'error');
+        if (!validExtensions.includes(fileExtension)) {
+            showStatus('❌ Please upload a valid file (.txt, .md, .json, .tex)', 'error');
+            return;
+        }
+        
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+            showStatus('❌ File too large. Maximum size is 10MB.', 'error');
             return;
         }
         
@@ -131,11 +133,11 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 statusMessage.textContent = '';
                 statusMessage.className = 'text-center text-sm min-h-[1.5rem] font-medium';
-            }, 3000);
+            }, 5000);
         }
     }
     
-    // Form Submission Handler
+    // 🔥 FIXED: Better download handling
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         
@@ -149,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.disabled = true;
         btnText.textContent = 'Converting...';
         spinner.classList.remove('hidden');
-        showStatus('');
+        showStatus('🔄 Converting your file...', 'info');
         
         try {
             const response = await fetch(API_URL, {
@@ -168,28 +170,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
             }
             
+            // 🔥 FIXED: Force download with proper filename
             const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
             
+            // Get filename from response headers
             const contentDisposition = response.headers.get('content-disposition');
             let fileName = `converted.${formatSelect.value}`;
+            
             if (contentDisposition) {
                 const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/);
                 if (fileNameMatch && fileNameMatch.length === 2) {
                     fileName = fileNameMatch[1];
                 }
             }
+            
+            // 🔥 FIXED: Create download link and trigger it
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
             a.download = fileName;
             
+            // Append to body, click, and cleanup
             document.body.appendChild(a);
             a.click();
-            window.URL.revokeObjectURL(url);
-            a.remove();
             
-            showStatus(`✅ Downloaded: ${fileName}`, 'success');
+            // Cleanup
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }, 100);
+            
+            showStatus(`✅ Successfully downloaded: ${fileName}`, 'success');
             
         } catch (error) {
             console.error('Conversion error:', error);
@@ -247,7 +259,6 @@ This will be converted to **Markdown** format.
 It supports multiple lines and basic formatting will be preserved.`
     };
     
-    // Load example when format changes
     formatSelect.addEventListener('change', function() {
         if (!contentInput.value.trim()) {
             contentInput.value = examples[this.value] || '';
