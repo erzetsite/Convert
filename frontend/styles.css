@@ -1,0 +1,45 @@
+/* Rosé Pine palette */
+:root {
+  --base:   #191724;
+  --surface:#1f1d2e;
+  --overlay:#26233a;
+  --muted:  #6e6a86;
+  --subtle: #908caa;
+  --text:   #e0def4;
+  --love:   #eb6f92;
+  --gold:   #f6c177;
+  --rose:   #ebbcba;
+  --pine:   #31748f;
+  --foam:   #9ccfd8;
+  --iris:   #c4a7e7;
+}
+.rp-light {
+  --base:   #faf4ed;
+  --surface:#fffaf3;
+  --overlay:#f2e9e1;
+  --muted:  #9893a5;
+  --subtle: #797593;
+  --text:   #575279;
+  --love:   #b4637a;
+  --gold:   #ea9d34;
+  --rose:   #d7827e;
+  --pine:   #286983;
+  --foam:   #56949f;
+  --iris:   #907aa9;
+}
+.bg-base   { background-color: var(--base); }
+.bg-surface{ background-color: var(--surface); }
+.bg-overlay{ background-color: var(--overlay); }
+.bg-love   { background-color: var(--love); }
+.bg-highlight{ background-color: var(--gold); }
+.text-base { color: var(--base); }
+.text-text { color: var(--text); }
+.text-subtle{color: var(--subtle);}
+.text-love { color: var(--love); }
+.text-foam { color: var(--foam); }
+.border-highlight{ border-color: var(--overlay); }
+.border-love { border-color: var(--love); }
+
+/* theme toggle */
+.rp-dark #icon-dark,
+.rp-light #icon-light{ display:inline-block; }
