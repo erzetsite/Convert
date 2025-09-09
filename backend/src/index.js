@@ -9,18 +9,17 @@ const app = new Hono();
 
 // Add CORS middleware to allow requests from the frontend domain
 app.use('/convert', cors({
-  origin: ['https://convert.rzsite.my.id', 'http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: ['https://convert.rzsite.my.id', 'http://localhost:3000', 'http://127.0.0.1:3000', '*'], // Allow all for testing
   allowMethods: ['POST', 'OPTIONS'],
   allowHeaders: ['Content-Type'],
+  credentials: true,
 }));
 
 // LaTeX to DOCX conversion helper
 function createLatexDocument(latexContent) {
-  // Extract title and content from LaTeX
   const titleMatch = latexContent.match(/\\title\{([^}]+)\}/);
   const title = titleMatch ? titleMatch[1] : 'Document';
   
-  // Remove LaTeX commands and extract plain text
   const plainText = latexContent
     .replace(/\\documentclass\{[^}]+\}/g, '')
     .replace(/\\usepackage\{[^}]+\}/g, '')
@@ -62,7 +61,6 @@ function createExcelFromJSON(jsonData) {
     const data = JSON.parse(jsonData);
     
     if (Array.isArray(data) && data.length > 0) {
-      // Array of objects (like [{"Nama":"Faza","Nilai":90}])
       const headers = Object.keys(data[0]);
       worksheet.addRow(headers);
       
@@ -70,16 +68,13 @@ function createExcelFromJSON(jsonData) {
         worksheet.addRow(headers.map(header => item[header]));
       });
     } else if (typeof data === 'object' && data !== null) {
-      // Single object
       Object.entries(data).forEach(([key, value]) => {
         worksheet.addRow([key, value]);
       });
     } else {
-      // Plain text
       worksheet.getCell('A1').value = jsonData;
     }
   } catch (error) {
-    // If not valid JSON, treat as plain text
     worksheet.getCell('A1').value = jsonData;
   }
   
@@ -101,11 +96,9 @@ app.post('/convert', async (c) => {
       case 'docx':
         let doc;
         
-        // Check if content contains LaTeX
         if (content.includes('\\documentclass') || content.includes('\\begin{document}')) {
           doc = createLatexDocument(content);
         } else {
-          // Regular text to DOCX
           doc = new Document({
             sections: [
               {
@@ -128,11 +121,9 @@ app.post('/convert', async (c) => {
       case 'xlsx':
         let workbook;
         
-        // Check if content is JSON
         if (content.trim().startsWith('[') || content.trim().startsWith('{')) {
           workbook = createExcelFromJSON(content);
         } else {
-          // Plain text to Excel
           workbook = new ExcelJS.Workbook();
           const worksheet = workbook.addWorksheet('Sheet 1');
           worksheet.getCell('A1').value = content;
@@ -148,11 +139,9 @@ app.post('/convert', async (c) => {
         const page = pdfDoc.addPage();
         const { width, height } = page.getSize();
         
-        // Simple text wrapping for PDF
         const fontSize = 12;
         const lineHeight = fontSize * 1.5;
         const margin = 50;
-        const maxWidth = width - (margin * 2);
         
         const lines = content.split('\n');
         let y = height - margin;
@@ -191,10 +180,16 @@ app.post('/convert', async (c) => {
         return c.json({ error: 'Unsupported format' }, 400);
     }
 
+    // 🔥 FIXED: Proper response headers for file download
     return new Response(buffer, {
       headers: {
         'Content-Type': contentType,
-        'Content-Disposition': `attachment; filename="${fileName}"`,
+        'Content-Disposition': `attachment; filename="${fileName}"; filename*=UTF-8''${encodeURIComponent(fileName)}`,
+        'Content-Length': buffer.byteLength.toString(),
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Access-Control-Expose-Headers': 'Content-Disposition',
       },
     });
 
